@@ -1,0 +1,12 @@
+{
+  "sequence": [
+    { "target": 1.0, "duration": 100, "pause": 8000 },
+    { "target": 0.3, "duration": 500, "pause": 300 },
+    { "target": 1.0, "duration": 400, "pause": 200 },
+    { "target": 0.0, "duration": 2000, "pause": 0 }
+  ],
+  "logo": {
+    "appear_ms": 3000,
+    "fade_out_ms": 7000
+  }
+}
