@@ -6,10 +6,13 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,17 +21,25 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.tech.cortisolmod.CortisolMod;
 import net.tech.cortisolmod.client.ClientCortisolData;
 import net.tech.cortisolmod.client.CortisolHudOverlay;
+import net.tech.cortisolmod.client.EyesHudOverlay;
+import net.tech.cortisolmod.client.cinematic.BlinkCinematic;
+import net.tech.cortisolmod.client.cinematic.CinematicConfig;
 import net.tech.cortisolmod.cortisol.PlayerCortisol;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
 import net.tech.cortisolmod.item.ModItems;
+import net.tech.cortisolmod.item.custom.CortisolSwordItem;
 import net.tech.cortisolmod.mixin.PostChainAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 
 import java.util.List;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+
 
 public class ClientEvents {
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -36,6 +47,31 @@ public class ClientEvents {
         @SubscribeEvent
         public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
             event.registerAboveAll("cortisol", CortisolHudOverlay.HUD_CORTISOL);
+            event.registerAboveAll("eyes", EyesHudOverlay.HUD_EYES);
+        }
+
+        @SubscribeEvent
+        public static void onRegisterReloadListeners(RegisterClientReloadListenersEvent event) {
+            event.registerReloadListener(new ResourceManagerReloadListener() {
+                @Override
+                public void onResourceManagerReload(ResourceManager manager) {
+                    CinematicConfig.load(manager);
+                }
+            });
+        }
+
+        @SubscribeEvent
+        public static void onClientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
+            event.enqueueWork(() -> {
+                ItemProperties.register(
+                        ModItems.CORTISOL_SWORD.get(),
+                        new ResourceLocation(CortisolMod.MOD_ID, "cortisol_level"),
+                        (stack, level, entity, seed) -> {
+                            float cortisol = ClientCortisolData.getPlayerCortisol();
+                            return (float) CortisolSwordItem.getLevel(cortisol);
+                        }
+                );
+            });
         }
     }
 
@@ -112,6 +148,40 @@ public class ClientEvents {
                 mc.gameRenderer.loadEffect(blur);
             }
         }
+
+        @SubscribeEvent
+        public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
+            BlinkCinematic.animateTo(1.0f);
+            BlinkCinematic.playSequence(CinematicConfig.buildSequenceArray());
+
+            Minecraft.getInstance().execute(() -> {
+                Minecraft.getInstance().getSoundManager().play(
+                        SimpleSoundInstance.forMusic(SoundEvents.MUSIC_DISC_OTHERSIDE)
+                );
+            });
+
+            CinematicConfig.LogoConfig logo = CinematicConfig.getLogo();
+            Thread t = new Thread(() -> {
+                try {
+                    Thread.sleep(logo.appearMs());
+                    BlinkCinematic.showLogo();
+                    Thread.sleep(logo.fadeOutMs() - logo.appearMs());
+                    BlinkCinematic.startLogoFadeOut();
+                } catch (InterruptedException ignored) {}
+            });
+            t.setDaemon(true);
+            t.start();
+        }
+
+        @SubscribeEvent
+        public static void onRenderHotbar(RenderGuiOverlayEvent.Pre event) {
+            if (event.getOverlay() == VanillaGuiOverlay.HOTBAR.type()) {
+                if (BlinkCinematic.getBlinkAmount() > 0.23f) {
+                    event.setCanceled(true);
+                }
+            }
+        }
+
         @SubscribeEvent
         public static void cameraBlur(net.minecraftforge.event.TickEvent.RenderTickEvent event){
             Minecraft mc = Minecraft.getInstance();
@@ -122,7 +192,7 @@ public class ClientEvents {
                 return;
             }
 
-
+            System.out.println("blur");
 
             List<PostPass> passes = accessor.getPasses();
 
