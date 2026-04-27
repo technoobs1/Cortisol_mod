@@ -28,6 +28,7 @@ import net.tech.cortisolmod.cortisol.PlayerCortisol;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.item.custom.CortisolSwordItem;
+import net.tech.cortisolmod.item.custom.ScrollingPhoneItem;
 import net.tech.cortisolmod.mixin.PostChainAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -42,38 +43,7 @@ import static java.lang.Math.min;
 
 
 public class ClientEvents {
-    @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class ClientModBusEvents {
-        @SubscribeEvent
-        public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
-            event.registerAboveAll("cortisol", CortisolHudOverlay.HUD_CORTISOL);
-            event.registerAboveAll("eyes", EyesHudOverlay.HUD_EYES);
-        }
 
-        @SubscribeEvent
-        public static void onRegisterReloadListeners(RegisterClientReloadListenersEvent event) {
-            event.registerReloadListener(new ResourceManagerReloadListener() {
-                @Override
-                public void onResourceManagerReload(ResourceManager manager) {
-                    CinematicConfig.load(manager);
-                }
-            });
-        }
-
-        @SubscribeEvent
-        public static void onClientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                ItemProperties.register(
-                        ModItems.CORTISOL_SWORD.get(),
-                        new ResourceLocation(CortisolMod.MOD_ID, "cortisol_level"),
-                        (stack, level, entity, seed) -> {
-                            float cortisol = ClientCortisolData.getPlayerCortisol();
-                            return (float) CortisolSwordItem.getLevel(cortisol);
-                        }
-                );
-            });
-        }
-    }
 
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class cameraShake {
@@ -192,7 +162,6 @@ public class ClientEvents {
                 return;
             }
 
-            System.out.println("blur");
 
             List<PostPass> passes = accessor.getPasses();
 
@@ -220,19 +189,7 @@ public class ClientEvents {
 
     }
 
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            ItemProperties.register(ModItems.SCROLLING_PHONE.get(),
-                    new ResourceLocation("cortisolmod", "activated"),
-                    (stack, level, entity, seed) -> {
-                        if (stack.hasTag() && stack.getTag().getBoolean("activated")) {
-                            return 1.0F;
-                        }
-                        return 0.0F;
-                    });
-        });
-    }
+
 
 }
 
