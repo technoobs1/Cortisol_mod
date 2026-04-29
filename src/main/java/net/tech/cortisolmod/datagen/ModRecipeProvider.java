@@ -1,13 +1,17 @@
 package net.tech.cortisolmod.datagen;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
 import net.tech.cortisolmod.CortisolMod;
+import net.tech.cortisolmod.block.ModBlocks;
+import net.tech.cortisolmod.item.ModItems;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -20,6 +24,16 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> pWriter) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SCROLLING_PHONE.get())
+                .pattern("III")
+                .pattern("IDI")
+                .pattern("IRI")
+                .define('I', Items.IRON_INGOT)
+                .define('D', Items.DIAMOND)
+                .define('R', Items.REDSTONE)
+                .define('e',Ingredient.EMPTY)
+                .unlockedBy(getHasName(Items.DIAMOND),has(Items.DIAMOND))
+                .save(pWriter);
         }
 
     protected static void oreSmelting(Consumer<FinishedRecipe> pFinishedRecipeConsumer, List<ItemLike> pIngredients, RecipeCategory pCategory, ItemLike pResult, float pExperience, int pCookingTIme, String pGroup) {
