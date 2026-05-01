@@ -63,7 +63,9 @@ public class ScrollingPhoneItem extends Item {
                 pPlayer.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() > 0) {
                         cortisol.subCortisol(CORTISOL_SUB_PHONE);
-                        ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), (ServerPlayer) pPlayer);
+                        ModMessages.sendToAllPlayers(
+                                new CortisolSyncS2CPacket(pPlayer.getId(), cortisol.getCortisol())
+                        );
                     }
                 });
             }

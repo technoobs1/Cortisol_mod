@@ -2,6 +2,7 @@ package net.tech.cortisolmod.event;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
@@ -32,6 +34,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.tech.cortisolmod.CortisolMod;
+import net.tech.cortisolmod.client.ClientCortisolData;
 import net.tech.cortisolmod.cortisol.PlayerCortisol;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
 import net.tech.cortisolmod.item.custom.CortisolSwordItem;
@@ -42,6 +45,7 @@ import net.tech.cortisolmod.util.ModDamageTypes;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEvents {
@@ -90,6 +94,12 @@ public class ModEvents {
             event.getOriginal().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(oldStore -> {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(newStore -> {
                     newStore.copyFrom(oldStore);
+
+                    if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+                        ModMessages.sendToAllPlayers(
+                                new CortisolSyncS2CPacket(serverPlayer.getId(), newStore.getCortisol())
+                        );
+                    }
                 });
             });
         }
@@ -118,7 +128,9 @@ public class ModEvents {
                     player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                         if (cortisol.getCortisol() > PlayerCortisol.MIN_CORTISOL) {
                             cortisol.subCortisol(CAMPFIRE_DECREASE_AMOUNT);
-                            ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                            ModMessages.sendToAllPlayers(
+                                    new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                            );
                         }
                     });
                     break;
@@ -190,6 +202,7 @@ public class ModEvents {
 
 
                         player.getInventory().setChanged();
+                        player.inventoryMenu.broadcastChanges();
                     }
                 }
 
@@ -200,16 +213,32 @@ public class ModEvents {
 
                 if(!nearbyCreepers.isEmpty()){
                    cortisol.addCortisol(CREEPER_CORTISOL);
-                   ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                    ModMessages.sendToAllPlayers(
+                            new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                    );
+                }
 
+                if (held.getItem() instanceof CortisolSwordItem) {
+                    var attribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
+                    if (attribute == null) return;
+
+                    AttributeModifier modifier = attribute.getModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                    float damage = CortisolSwordItem.getDamageForCortisol(cortisol.getCortisol());
+
+                    if (modifier == null || modifier.getAmount() != damage) {
+                        attribute.removeModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                        attribute.addTransientModifier(new AttributeModifier(
+                                CortisolSwordItem.ATTACK_DAMAGE_UUID,
+                                "Cortisol damage",
+                                damage,
+                                AttributeModifier.Operation.ADDITION
+                        ));
+                    }
                 }
             });
         }
     }
-    @SubscribeEvent
-    public static void onPlayerDamage(){
 
-    }
     @SubscribeEvent
     public static void onPlayerEat(LivingEntityUseItemEvent.Finish event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -217,7 +246,9 @@ public class ModEvents {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() > PlayerCortisol.MIN_CORTISOL) {
                         cortisol.subCortisol(EAT_DECREASE_AMOUNT);
-                        ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                        ModMessages.sendToAllPlayers(
+                                new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                        );
                     }
                 });
             }
@@ -229,11 +260,10 @@ public class ModEvents {
         if (event.getEntity() instanceof ServerPlayer player){
             player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                 if (cortisol.getCortisol() < PlayerCortisol.REAL_MAX_CORTISOL) {
-
                     cortisol.addCortisol(DAMAGE_INCREASE_AMOUNT);
-
-
-                    ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                    ModMessages.sendToAllPlayers(
+                            new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                    );
                 }
             });
         }
@@ -244,11 +274,10 @@ public class ModEvents {
 
                 player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() < PlayerCortisol.REAL_MAX_CORTISOL) {
-
                         cortisol.addCortisol(ATTACK_INCREASE_AMOUNT);
-
-
-                        ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                        ModMessages.sendToAllPlayers(
+                                new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                        );
                     }
                 });
             }
@@ -260,7 +289,10 @@ public class ModEvents {
         event.getPlayer().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
             if (cortisol.getCortisol() < PlayerCortisol.REAL_MAX_CORTISOL) {
                 cortisol.addCortisol(BREAK_INCREASE_AMOUNT);
-                ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), (ServerPlayer) event.getPlayer());
+                Player player = event.getPlayer();
+                ModMessages.sendToAllPlayers(
+                        new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                );
             }
         });
     }
@@ -270,7 +302,9 @@ public class ModEvents {
         if (!event.getLevel().isClientSide()) {
             if (event.getEntity() instanceof ServerPlayer player) {
                 player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-                    ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), player);
+                    ModMessages.sendToAllPlayers(
+                            new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                    );
                 });
             }
         }
