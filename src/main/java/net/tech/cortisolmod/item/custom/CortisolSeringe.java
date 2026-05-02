@@ -32,8 +32,9 @@ public class CortisolSeringe extends Item {
 
         pPlayer.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol->{
             cortisol.addCortisol(cortisol_add_sub);
-            ModMessages.sendToPlayer(new CortisolSyncS2CPacket(cortisol.getCortisol()), (ServerPlayer) pPlayer);
-
+            ModMessages.sendToAllPlayers(
+                    new CortisolSyncS2CPacket(pPlayer.getId(), cortisol.getCortisol())
+            );
         });
         if (!pPlayer.getAbilities().instabuild) {
             itemstack.shrink(1);
