@@ -7,6 +7,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.tech.cortisolmod.CortisolMod;
 import net.tech.cortisolmod.item.custom.CortisolSwordItem;
+import net.tech.cortisolmod.item.custom.LowCortisolBowItem;
 import net.tech.cortisolmod.item.custom.ScrollingPhoneItem;
 
 public class ModItems {
@@ -19,6 +20,9 @@ public class ModItems {
     );
     public static final RegistryObject<Item> SCROLLING_PHONE=ITEMS.register("scrolling_phone",
             ()->new ScrollingPhoneItem(new Item.Properties().stacksTo(1))
+    );
+    public static final RegistryObject<Item> LOW_CORTISOL_BOW=ITEMS.register("LOW_CORTISOL_BOW",
+            ()->new LowCortisolBowItem(new Item.Properties().stacksTo(1))
     );
 
     public static void register(IEventBus eventBus){

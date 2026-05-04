@@ -61,7 +61,7 @@ public class BlinkCinematic {
      * @return true si l'écran n'est pas complètement transparent (currentAmount > 0), ou si logo du jeu visible.
      */
     public static boolean isPlaying() {
-        // On lit currentAmount directement, sans recalculer
+        // On lit currentAmount directement
         return currentAmount > 0f || logoVisible;
     }
 
