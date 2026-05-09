@@ -11,6 +11,8 @@ import net.tech.cortisolmod.CortisolMod;
 import net.tech.cortisolmod.client.cinematic.BlinkCinematic;
 import net.minecraft.resources.ResourceLocation;
 
+import static net.tech.cortisolmod.client.cinematic.BlinkCinematic.playSequence;
+
 public class EyesHudOverlay {
 
     public static final IGuiOverlay HUD_EYES = (gui, graphics, partialTick, screenWidth, screenHeight) -> {
@@ -51,6 +53,18 @@ public class EyesHudOverlay {
         }
     }
 
+
+
+    // Simple func to blink eyes one time
+    public static void blink() {
+        // -1 to use pre-defined duration
+        // eye closes %, duration, pause before continue
+        float[] blinkSequence = {
+                0.9f, -1f, 0f,
+                0f, -1f, 0f,
+        };
+        playSequence(blinkSequence);
+    }
     private static void renderEye(GuiGraphics gg, int w, int h, float blink) {
         float t = blink;
         t = t * t * (3f - 2f * t);

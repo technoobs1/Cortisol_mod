@@ -30,7 +30,7 @@ public class CortisolMod
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 
-
+        ModCreativeModTabs.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModCreativeModTabs.register(modEventBus);

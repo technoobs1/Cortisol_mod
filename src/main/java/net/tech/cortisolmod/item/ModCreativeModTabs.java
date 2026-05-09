@@ -13,7 +13,7 @@ import net.tech.cortisolmod.CortisolMod;
 public class ModCreativeModTabs {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS=
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CortisolMod.MOD_ID);
-    public static final RegistryObject<CreativeModeTab> CORTISOL_TAB = CREATIVE_MODE_TABS.register("cortisol_tab",()-> CreativeModeTab.builder().icon(()-> new ItemStack(ModItems.CORTISOL_SWORD.get()))
+    public static final RegistryObject<CreativeModeTab> TEST_TAB = CREATIVE_MODE_TABS.register("cortisol_tab",()-> CreativeModeTab.builder().icon(()-> new ItemStack(ModItems.CORTISOL_SWORD.get()))
             .title(Component.translatable("creativetab.cortisol_tab"))
             // Auto add all registered items
             .displayItems((parameters, output) -> {
@@ -25,6 +25,8 @@ public class ModCreativeModTabs {
             .displayItems((pParameters, pOutput)-> {
                 pOutput.accept(ModItems.SCROLLING_PHONE.get());
                 pOutput.accept(ModItems.CORTISOL_SWORD.get());
+                pOutput.accept(ModItems.HIGH_CORTISOL_INJECTOR.get());
+
             })
             */
             .build());
