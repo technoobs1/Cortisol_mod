@@ -39,8 +39,8 @@ public class CortisolAura {
 
         for (Player player : mc.level.players()) {
 
-            // Don't spawn aura on self ???
-            //if (player == clientPlayer) continue;
+            // Don't spawn aura on self
+            if (player == clientPlayer) continue;
 
             float cortisol = ClientCortisolData.getPlayerCortisol(player.getId());
             if (cortisol < AURA_THRESHOLD) continue;

@@ -1,0 +1,153 @@
+package net.tech.cortisolmod.event;
+
+import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.MobSpawnEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.tech.cortisolmod.particle.ModParticles;
+
+import java.util.Objects;
+import java.util.UUID;
+
+/*
+Events related to special Cortisol Mob (potentially, all monsters)
+ */
+@Mod.EventBusSubscriber
+public class CortisolMobEvents {
+    private static final String TAG_CORTISOL = "cortisol_mob";
+
+    private static final UUID SPEED_UUID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID DAMAGE_UUID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    private static final UUID HEALTH_UUID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+    // 0.5 to x1.5, 1 to x2, etx...
+    private static final float SPEED_MODIFIER = 0.5f;
+    private static final float DAMAGE_MODIFIER = 2f;
+    private static final float HEALTH_MODIFIER = 2f;
+
+    // 1% chance (it's actually a lot, no ???)
+    //private static final double CHANCE = 0.01;
+    private static final double CHANCE = 0.1;
+
+    @SubscribeEvent
+    public static void onFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+        Mob mob = event.getEntity();
+
+        // Server only, and only aggressive mobs
+        if (mob.level().isClientSide) return;
+        if (!(mob instanceof Monster)) return;
+
+        // Check if cortisol tag already exist
+        CompoundTag tag = mob.getPersistentData();
+        if (tag.getBoolean(TAG_CORTISOL)) return;
+
+        // RNG
+        if (mob.getRandom().nextDouble() > CHANCE) {
+            tag.putBoolean(TAG_CORTISOL, false);
+            return;
+        };
+        applyCortisol(mob);
+    }
+
+    private static void applyCortisol(Mob mob) {
+        CompoundTag tag = mob.getPersistentData();
+        tag.putBoolean(TAG_CORTISOL, true);
+
+        if (mob.getAttribute(Attributes.MOVEMENT_SPEED) != null) {
+            Objects.requireNonNull(mob.getAttribute(Attributes.MOVEMENT_SPEED)).addPermanentModifier(
+                    new AttributeModifier(SPEED_UUID, "cortisol_speed", SPEED_MODIFIER, AttributeModifier.Operation.MULTIPLY_TOTAL)
+            );
+        }
+        if (mob.getAttribute(Attributes.ATTACK_DAMAGE) != null) {
+            Objects.requireNonNull(mob.getAttribute(Attributes.ATTACK_DAMAGE)).addPermanentModifier(
+                    new AttributeModifier(DAMAGE_UUID, "cortisol_damage", DAMAGE_MODIFIER, AttributeModifier.Operation.MULTIPLY_TOTAL)
+            );
+        }
+        if (mob.getAttribute(Attributes.MAX_HEALTH) != null) {
+            Objects.requireNonNull(mob.getAttribute(Attributes.MAX_HEALTH)).addPermanentModifier(
+                    new AttributeModifier(HEALTH_UUID, "cortisol_health", HEALTH_MODIFIER, AttributeModifier.Operation.MULTIPLY_TOTAL)
+            );
+        }
+
+        // Heal after health changes
+        mob.setHealth(mob.getMaxHealth());
+
+        // Simple visuals
+        mob.setCustomNameVisible(true);
+        mob.setCustomName(net.minecraft.network.chat.Component.literal("§cCortisol " + mob.getName().getString()));
+    }
+
+    // Made special drop for cortisol mob
+    @SubscribeEvent
+    public static void onMobDrops(LivingDropsEvent event) {
+        LivingEntity entity = event.getEntity();
+
+        if (entity.level().isClientSide) return;
+        if (!entity.getPersistentData().getBoolean(TAG_CORTISOL)) return;
+
+        Level level = entity.level();
+        ItemStack diamonds = new ItemStack(Items.DIAMOND, 300);
+
+        ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), diamonds);
+        event.getDrops().add(drop);
+    }
+
+
+
+
+
+
+    // Set particles effects on these mobs
+    @SubscribeEvent
+    public static void onLivingTick(net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent event) {
+        var entity = event.getEntity();
+
+        if (entity.level().isClientSide) return;
+        if (!entity.getPersistentData().getBoolean(TAG_CORTISOL)) return;
+
+        if (!(entity.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+
+        // optimisation : pas chaque tick
+        if (entity.tickCount % 5 != 0) return;
+
+        spawnEliteAura(level, entity);
+    }
+
+    private static void spawnEliteAura(net.minecraft.server.level.ServerLevel level,
+                                       net.minecraft.world.entity.LivingEntity entity) {
+
+        double centerX = entity.getX();
+        double centerZ = entity.getZ();
+
+        double baseY = entity.getY();
+        double height = entity.getBbHeight();
+
+        float radius = 1f;
+
+        double x = centerX + (entity.getRandom().nextDouble() - 0.5) * radius;
+        double y = baseY + entity.getRandom().nextDouble() * height;
+        double z = centerZ + (entity.getRandom().nextDouble() - 0.5) * radius;
+
+        level.sendParticles(
+                ModParticles.CORTISOL_PARTICLE.get(),
+                x, y, z,
+                1,
+                0, 0, 0,
+                0f
+        );
+    }
+}
