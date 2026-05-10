@@ -6,9 +6,6 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -16,7 +13,6 @@ import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.tech.cortisolmod.CortisolMod;
 import net.tech.cortisolmod.client.ClientCortisolData;
 import net.tech.cortisolmod.client.CortisolHudOverlay;
@@ -30,21 +26,15 @@ import net.tech.cortisolmod.particle.ModParticles;
 
 public class ClientSetup {
 
-    public static void loadBlurShader(){
+    public static void loadCortisolShader(){
         Minecraft mc = Minecraft.getInstance();
 
 
-        ResourceLocation blur = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/cortisol_blur.json");
+        ResourceLocation blur = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/cortisol_shader.json");
         mc.gameRenderer.loadEffect(blur);
 
     }
-    public static void loadLowCortisolShader(){
-        Minecraft mc = Minecraft.getInstance();
 
-        ResourceLocation yellow = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/low_cortisol_shader.json");
-        mc.gameRenderer.loadEffect(yellow);
-
-    }
 
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModBusEvents {
@@ -108,7 +98,8 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
         if (!(event.getLevel() instanceof ClientLevel)) return;
-        loadLowCortisolShader();
-        loadBlurShader();
+        loadCortisolShader();
+
+
     }
 }

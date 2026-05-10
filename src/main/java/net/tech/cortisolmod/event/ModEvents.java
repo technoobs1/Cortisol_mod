@@ -62,6 +62,7 @@ public class ModEvents {
     public static final int DAMAGE_TICK_INTERVAL = 20;
     public static final float DAMAGE_PER_TICK = 2.0f;
     public static final float BASE_CORTISOL = 30.f;
+    public static final float FISHING_CORTISOL = 0.05f;
 
     public static final float CREEPER_CORTISOL= 1f;
     public static final double CREEPER_CORTISOL_RADIUS = 7;
@@ -188,7 +189,7 @@ public class ModEvents {
                 }
 
                 if(player.fishing!=null&&player.fishing.isInWater()){
-                    cortisol.subCortisol(0.05f);
+                    cortisol.subCortisol(FISHING_CORTISOL);
 
                 }
 
@@ -235,24 +236,25 @@ public class ModEvents {
 
                 if (held.getItem() instanceof CortisolSwordItem) {
                     var attribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
-                    if (attribute == null) return;
+                    if (! (attribute == null) ) {
 
-                    AttributeModifier modifier = attribute.getModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
-                    float damage = CortisolSwordItem.getDamageForCortisol(cortisol.getCortisol());
+                        AttributeModifier modifier = attribute.getModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                        float damage = CortisolSwordItem.getDamageForCortisol(cortisol.getCortisol());
 
-                    if (modifier == null || modifier.getAmount() != damage) {
-                        attribute.removeModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
-                        attribute.addTransientModifier(new AttributeModifier(
-                                CortisolSwordItem.ATTACK_DAMAGE_UUID,
-                                "Cortisol damage",
-                                damage,
-                                AttributeModifier.Operation.ADDITION
-                        ));
+                        if (modifier == null || modifier.getAmount() != damage) {
+                            attribute.removeModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                            attribute.addTransientModifier(new AttributeModifier(
+                                    CortisolSwordItem.ATTACK_DAMAGE_UUID,
+                                    "Cortisol damage",
+                                    damage,
+                                    AttributeModifier.Operation.ADDITION
+                            ));
+                        }
                     }
                 }
 
                 //random blinking
-                if (currentCortisol<BLINKING_TREASHOLD&&player.getRandom().nextFloat()<0.005f){
+                if (currentCortisol<BLINKING_TREASHOLD&&player.getRandom().nextFloat()<0.001f){
 
                     EyesHudOverlay.blink();
                 }

@@ -60,8 +60,8 @@ public class EyesHudOverlay {
         // -1 to use pre-defined duration
         // eye closes %, duration, pause before continue
         float[] blinkSequence = {
-                0.9f, -1f, 0f,
-                0f, -1f, 0f,
+                0.8f,500f, 0f,
+                0f, 500f, 0f,
         };
         playSequence(blinkSequence);
     }

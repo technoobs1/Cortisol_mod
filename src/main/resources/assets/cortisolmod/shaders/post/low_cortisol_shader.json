@@ -7,8 +7,8 @@
       "outtarget": "swap",
       "uniforms": [
         {
-        "name": "YellowLevel",
-          "values":[10]
+          "name": "Intensity",
+          "values":[0.0]
         }
       ]
     },

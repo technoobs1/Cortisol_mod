@@ -3,10 +3,7 @@ package net.tech.cortisolmod.event;
 import com.mojang.blaze3d.shaders.Uniform;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -105,8 +102,8 @@ public class ClientEvents {
             if (lastCameraType!=current){
 
                 if (current.isFirstPerson()){
-                    ClientSetup.loadBlurShader();
-                    ClientSetup.loadLowCortisolShader();
+                    ClientSetup.loadCortisolShader();
+
                 }
 
                 lastCameraType=current;
@@ -124,7 +121,7 @@ public class ClientEvents {
         }
 
         @SubscribeEvent
-        public static void cameraBlur(net.minecraftforge.event.TickEvent.RenderTickEvent event){
+        public static void shaderUpdate(net.minecraftforge.event.TickEvent.RenderTickEvent event){
             Minecraft mc = Minecraft.getInstance();
             PostChain chain = mc.gameRenderer.currentEffect();
 
@@ -137,9 +134,9 @@ public class ClientEvents {
 
             for (PostPass pass : passes) {
                 EffectInstance effect = pass.getEffect();
-                Uniform u = effect.getUniform("RADIUS");
-
-                if (u != null) {
+                Uniform radius = effect.getUniform("RADIUS");
+                Uniform intensity = effect.getUniform("Intensity");
+                if (radius != null) {
 
 
                     float currentCortisol = ClientCortisolData.getPlayerCortisol();
@@ -148,8 +145,11 @@ public class ClientEvents {
                                     / (0.25f * PlayerCortisol.REAL_MAX_CORTISOL),
                             0), 1) * 0.4f;
 
-                    u.set(value);
+                    radius.set(value);
 
+                }
+                if (intensity!=null){
+                    intensity.set(max(1-ClientCortisolData.getPlayerCortisol()/30,0f));
                 }
             }
         }
