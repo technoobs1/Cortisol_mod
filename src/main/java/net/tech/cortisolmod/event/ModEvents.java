@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Creeper;
@@ -65,6 +66,8 @@ public class ModEvents {
     public static final float CREEPER_CORTISOL= 1f;
     public static final double CREEPER_CORTISOL_RADIUS = 7;
 
+    public static final float SPECIAL_MOB_CORTISOL = 1f;
+    public static final double SPECIAL_MOB_CORTISOL_RADIUS = 7;
 
     public static final int UPDATE_INTERVAL_TICKS = 20;
     public static final int LOW_CORTISOL_SLOWNESS_DURATION = 40;
@@ -134,13 +137,20 @@ public class ModEvents {
                     }
                 }
                 player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-                    //creeper cortisol
-                    AABB detectionZone = player.getBoundingBox().inflate(CREEPER_CORTISOL_RADIUS);
+                    // Special mob cortisol
+                    AABB detectionZone = player.getBoundingBox().inflate(SPECIAL_MOB_CORTISOL_RADIUS);
 
-                    List<Creeper> nearbyCreepers = level.getEntitiesOfClass(Creeper.class, detectionZone, EntitySelector.NO_SPECTATORS);
+                    List<Mob> nearbyMobs = level.getEntitiesOfClass(
+                            Mob.class,
+                            detectionZone,
+                            EntitySelector.NO_SPECTATORS
+                    );
 
-                    if (!nearbyCreepers.isEmpty()) {
-                        cortisol.addCortisol(CREEPER_CORTISOL);
+                    boolean foundCortisolMob = nearbyMobs.stream()
+                            .anyMatch(mob -> mob.getPersistentData().getBoolean("cortisol_mob"));
+
+                    if (foundCortisolMob) {
+                        cortisol.addCortisol(SPECIAL_MOB_CORTISOL);
                         ModMessages.sendToAllPlayers(
                                 new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
                         );

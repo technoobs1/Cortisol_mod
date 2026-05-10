@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,6 +25,8 @@ import net.tech.cortisolmod.client.cinematic.CinematicConfig;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.item.custom.CortisolSwordItem;
 import net.tech.cortisolmod.item.custom.ScrollingPhoneItem;
+import net.tech.cortisolmod.particle.CortisolParticle;
+import net.tech.cortisolmod.particle.ModParticles;
 
 public class ClientSetup {
 
@@ -45,6 +48,11 @@ public class ClientSetup {
 
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientModBusEvents {
+        @SubscribeEvent
+        public static void registerParticleProvider(RegisterParticleProvidersEvent event){
+            event.registerSpriteSet(ModParticles.CORTISOL_PARTICLE.get(), CortisolParticle.Provider::new);
+        }
+
         @SubscribeEvent
         public static void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
             event.registerAboveAll("cortisol", CortisolHudOverlay.HUD_CORTISOL);
