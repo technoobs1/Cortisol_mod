@@ -123,6 +123,7 @@ public class ClientEvents {
 
                 if (current.isFirstPerson()){
                     ClientSetup.loadBlurShader();
+                    ClientSetup.loadLowCortisolShader();
                 }
 
                 lastCameraType=current;

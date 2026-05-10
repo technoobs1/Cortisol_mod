@@ -30,10 +30,17 @@ public class ClientSetup {
     public static void loadBlurShader(){
         Minecraft mc = Minecraft.getInstance();
 
-        if (mc.gameRenderer.currentEffect() == null) {
-            ResourceLocation blur = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/cortisol_blur.json");
-            mc.gameRenderer.loadEffect(blur);
-        }
+
+        ResourceLocation blur = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/cortisol_blur.json");
+        mc.gameRenderer.loadEffect(blur);
+
+    }
+    public static void loadLowCortisolShader(){
+        Minecraft mc = Minecraft.getInstance();
+
+        ResourceLocation yellow = new ResourceLocation(CortisolMod.MOD_ID, "shaders/post/low_cortisol_shader.json");
+        mc.gameRenderer.loadEffect(yellow);
+
     }
 
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -93,7 +100,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onLevelLoad(LevelEvent.Load event) {
         if (!(event.getLevel() instanceof ClientLevel)) return;
-
+        loadLowCortisolShader();
         loadBlurShader();
     }
 }

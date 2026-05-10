@@ -1,0 +1,22 @@
+{
+  "targets": ["swap"],
+  "passes": [
+    {
+      "name": "cortisolmod:low_cortisol_shader",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+        {
+        "name": "YellowLevel",
+          "values":[10]
+        }
+      ]
+    },
+    {
+      "name": "minecraft:blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+
+    }
+  ]
+}
