@@ -99,7 +99,7 @@ public class CortisolMobEvents {
         if (!entity.getPersistentData().getBoolean(TAG_CORTISOL)) return;
 
         Level level = entity.level();
-        ItemStack diamonds = new ItemStack(Items.DIAMOND, 300);
+        ItemStack diamonds = new ItemStack(Items.STICK, 300);
 
         ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), diamonds);
         event.getDrops().add(drop);

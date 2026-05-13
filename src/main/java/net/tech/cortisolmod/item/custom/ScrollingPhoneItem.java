@@ -28,10 +28,14 @@ public class ScrollingPhoneItem extends Item {
 
         ItemStack stack = pPlayer.getItemInHand(pHand);
 
+        int damage = stack.getDamageValue();
 
-        stack.getOrCreateTag().putBoolean(ANIMATION_TAG, true);
+        if (damage < stack.getMaxDamage()) {
+            stack.getOrCreateTag().putBoolean(ANIMATION_TAG, true);
 
-        pPlayer.startUsingItem(pHand);
+            pPlayer.startUsingItem(pHand);
+        }
+
 
 
         return InteractionResultHolder.pass(stack);
@@ -52,6 +56,15 @@ public class ScrollingPhoneItem extends Item {
     }
 
     @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack,
+                                               ItemStack newStack,
+                                               boolean slotChanged) {
+
+        // ignore les changements de durabilité
+        return slotChanged || oldStack.getItem() != newStack.getItem();
+    }
+
+    @Override
     public void onUseTick(Level pLevel, LivingEntity pLivingEntity, ItemStack pStack, int pRemainingUseDuration){
 
 
@@ -59,6 +72,10 @@ public class ScrollingPhoneItem extends Item {
 
 
             if (pRemainingUseDuration % 5 == 0) {
+                if (!pPlayer.isCreative()){
+                pStack.setDamageValue(pStack.getDamageValue() + 1);
+                }
+
                 pPlayer.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() > 0) {
                         cortisol.subCortisol(CORTISOL_SUB_PHONE);
@@ -71,7 +88,10 @@ public class ScrollingPhoneItem extends Item {
         }
     }
 
-
+    @Override
+    public boolean isValidRepairItem(ItemStack pStack, ItemStack pRepairCandidate) {
+               return pRepairCandidate.is(Items.DIAMOND) || super.isValidRepairItem(pStack, pRepairCandidate);
+    }
     @Override
     public void inventoryTick(ItemStack pStack, Level pLevel, Entity pEntity, int pSlotId, boolean pIsSelected) {
 

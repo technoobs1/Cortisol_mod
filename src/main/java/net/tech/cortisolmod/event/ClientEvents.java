@@ -149,6 +149,7 @@ public class ClientEvents {
 
                 }
                 if (intensity!=null){
+
                     intensity.set(max(1-ClientCortisolData.getPlayerCortisol()/30,0f));
                 }
             }

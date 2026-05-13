@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
@@ -19,11 +21,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -51,6 +55,8 @@ public class ModEvents {
     public static final int ATTACK_INCREASE_AMOUNT = 1;
     public static final int DAMAGE_INCREASE_AMOUNT = 1;
     public static final int BREAK_INCREASE_AMOUNT = 1;
+
+    public static final float  CORTISOL_EXPLOSION_RADIUS=1;
 
     public static final int SLOW_THRESHOLD = 5;
     public static final int SPEED_CORTISOL_THRESHOLD = 70;
@@ -84,6 +90,7 @@ public class ModEvents {
         if (event.getObject() instanceof Player){
            if (!event.getObject().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).isPresent()){
                event.addCapability(new ResourceLocation(CortisolMod.MOD_ID, "properties"),new PlayerCortisolProvider());
+
            }
         }
     }
@@ -91,6 +98,7 @@ public class ModEvents {
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event){
         if (event.isWasDeath()){
+
             event.getOriginal().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(oldStore -> {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(newStore -> {
 
@@ -352,18 +360,14 @@ public class ModEvents {
                 });
             }
         }
-        if (event.getEntity() instanceof ServerPlayer player) {
+    }
+    @SubscribeEvent
+    public static void onPlayerDeath(LivingDeathEvent event){
+        if (event.getEntity() instanceof ServerPlayer player && event.getSource().is(ModDamageTypes.CORTISOL)){
+            player.level().explode(player,player.getX(),player.getY(),player.getZ(),CORTISOL_EXPLOSION_RADIUS,Level.ExplosionInteraction.TNT);
 
-            player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-
-                if (cortisol.getCortisol() == 0) {
-
-                    cortisol.setCortisol(BASE_CORTISOL);
-                }
-            });
         }
     }
-
 
     private static final String INTRO_TAG = "intro_played";
     // Start intro cutscene only if it is the first time the player logs in this world

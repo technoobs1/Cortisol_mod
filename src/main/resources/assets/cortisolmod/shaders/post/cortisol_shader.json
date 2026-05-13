@@ -1,7 +1,7 @@
 {
   "targets": [
     "swap",
-    "swap2"
+    "foo"
   ],
 
   "passes": [
@@ -20,13 +20,18 @@
     {
       "name": "cortisolmod:low_cortisol_shader",
       "intarget": "swap",
-      "outtarget": "minecraft:main",
+      "outtarget": "foo",
       "uniforms": [
         {
           "name": "Intensity",
-          "values": [0.6]
+          "values": [0.0]
         }
       ]
+    },
+    {
+      "name": "minecraft:blit",
+      "intarget": "foo",
+      "outtarget": "minecraft:main"
     }
   ]
 }

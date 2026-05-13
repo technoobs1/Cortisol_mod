@@ -31,7 +31,6 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('I', Items.IRON_INGOT)
                 .define('D', Items.DIAMOND)
                 .define('R', Items.REDSTONE)
-                .define('e',Ingredient.EMPTY)
                 .unlockedBy(getHasName(Items.DIAMOND),has(Items.DIAMOND))
                 .save(pWriter);
         }
