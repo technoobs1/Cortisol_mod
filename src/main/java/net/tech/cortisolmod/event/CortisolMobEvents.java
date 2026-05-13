@@ -18,8 +18,10 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.particle.ModParticles;
 
+import java.util.Random;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -87,19 +89,22 @@ public class CortisolMobEvents {
 
         // Simple visuals
         mob.setCustomNameVisible(true);
-        mob.setCustomName(net.minecraft.network.chat.Component.literal("§cCortisol " + mob.getName().getString()));
+        // Uncomment to set a custom name to the mob ("Cortisol [mobname]" in red)
+        // mob.setCustomName(net.minecraft.network.chat.Component.literal("§cCortisol " + mob.getName().getString()));
     }
 
     // Made special drop for cortisol mob
     @SubscribeEvent
     public static void onMobDrops(LivingDropsEvent event) {
+        Random random = new Random();
         LivingEntity entity = event.getEntity();
 
         if (entity.level().isClientSide) return;
         if (!entity.getPersistentData().getBoolean(TAG_CORTISOL)) return;
 
         Level level = entity.level();
-        ItemStack diamonds = new ItemStack(Items.DIAMOND, 300);
+        // Drop cortilium (random between 1 and 2)
+        ItemStack diamonds = new ItemStack(ModItems.CORTILIUM.get(), random.nextInt(2)+1);
 
         ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), diamonds);
         event.getDrops().add(drop);

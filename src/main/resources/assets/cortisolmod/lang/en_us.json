@@ -10,5 +10,7 @@
   "tooltip.cortisolmod.sword.desc": "§7An unstable blade bound to the bearer's cortisol level.",
   "tooltip.cortisolmod.cortisol": "§bCortisol: §f%s%%",
   "tooltip.cortisolmod.damage": "§cDamage: §f%s ⚔",
-  "tooltip.cortisolmod.stage": "§eStage: §f%s"
+  "tooltip.cortisolmod.stage": "§eStage: §f%s",
+
+  "tooltip.cortisolmod.cortilium" : "Useful to craft some cortisol related items."
 }
