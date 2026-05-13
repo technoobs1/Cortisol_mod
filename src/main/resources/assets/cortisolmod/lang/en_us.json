@@ -12,5 +12,12 @@
   "tooltip.cortisolmod.damage": "§cDamage: §f%s ⚔",
   "tooltip.cortisolmod.stage": "§eStage: §f%s",
 
-  "tooltip.cortisolmod.cortilium" : "Useful to craft some cortisol related items."
+  "tooltip.cortisolmod.cortilium" : "Useful to craft some cortisol related items.",
+
+  "advancement.cortisolmod.kill_cortisol_mob": "Elite Hunter",
+  "advancement.cortisolmod.kill_cortisol_mob.desc": "Kill a Cortisol mob",
+  "advancement.cortisolmod.root": "Cortisol",
+  "advancement.cortisolmod.root.desc": "Bienvenue dans le stress...",
+  "advancement.cortisolmod.max_cortisol": "On the Edge",
+  "advancement.cortisolmod.max_cortisol.desc": "Atteindre 100 de cortisol"
 }

@@ -1,5 +1,7 @@
 package net.tech.cortisolmod.event;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -39,6 +41,7 @@ import net.tech.cortisolmod.item.custom.CortisolSwordItem;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.networking.packet.CortisolSyncS2CPacket;
 import net.tech.cortisolmod.networking.packet.StartIntroCinematicS2CPacket;
+import net.tech.cortisolmod.util.AdvancementHelper;
 import net.tech.cortisolmod.util.ModDamageTypes;
 
 import java.util.List;
@@ -172,6 +175,11 @@ public class ModEvents {
                             false,
                             true
                     ));
+                }
+
+                // Grant the 100 cortisol advancement
+                if (currentCortisol >= 100) {
+                    AdvancementHelper.grant(player, "cortisolmod:max_cortisol");
                 }
 
                 //damage

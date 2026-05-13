@@ -1,8 +1,13 @@
 package net.tech.cortisolmod.event;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -20,6 +25,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.particle.ModParticles;
+import net.tech.cortisolmod.util.AdvancementHelper;
 
 import java.util.Random;
 import java.util.Objects;
@@ -108,6 +114,11 @@ public class CortisolMobEvents {
 
         ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), diamonds);
         event.getDrops().add(drop);
+
+        // Advancement
+        if (event.getSource().getEntity() instanceof ServerPlayer player) {
+            AdvancementHelper.grant(player, "cortisolmod:kill_cortisol_mob");
+        }
     }
 
 
