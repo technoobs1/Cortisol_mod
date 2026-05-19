@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySelector;
@@ -21,11 +23,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -55,6 +59,8 @@ public class ModEvents {
     public static final int DAMAGE_INCREASE_AMOUNT = 1;
     public static final int BREAK_INCREASE_AMOUNT = 1;
 
+    public static final float  CORTISOL_EXPLOSION_RADIUS=1;
+
     public static final int SLOW_THRESHOLD = 5;
     public static final int SPEED_CORTISOL_THRESHOLD = 70;
     public static final int DROP_ITEM_CORTISOL_THRESHOLD = 80;
@@ -65,6 +71,7 @@ public class ModEvents {
     public static final int DAMAGE_TICK_INTERVAL = 20;
     public static final float DAMAGE_PER_TICK = 2.0f;
     public static final float BASE_CORTISOL = 30.f;
+    public static final float FISHING_CORTISOL = 0.05f;
 
     public static final float CREEPER_CORTISOL= 1f;
     public static final double CREEPER_CORTISOL_RADIUS = 7;
@@ -86,6 +93,7 @@ public class ModEvents {
         if (event.getObject() instanceof Player){
            if (!event.getObject().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).isPresent()){
                event.addCapability(new ResourceLocation(CortisolMod.MOD_ID, "properties"),new PlayerCortisolProvider());
+
            }
         }
     }
@@ -93,6 +101,7 @@ public class ModEvents {
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event){
         if (event.isWasDeath()){
+
             event.getOriginal().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(oldStore -> {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(newStore -> {
 
@@ -196,7 +205,7 @@ public class ModEvents {
                 }
 
                 if(player.fishing!=null&&player.fishing.isInWater()){
-                    cortisol.subCortisol(0.05f);
+                    cortisol.subCortisol(FISHING_CORTISOL);
 
                 }
 
@@ -243,24 +252,25 @@ public class ModEvents {
 
                 if (held.getItem() instanceof CortisolSwordItem) {
                     var attribute = player.getAttribute(Attributes.ATTACK_DAMAGE);
-                    if (attribute == null) return;
+                    if (! (attribute == null) ) {
 
-                    AttributeModifier modifier = attribute.getModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
-                    float damage = CortisolSwordItem.getDamageForCortisol(cortisol.getCortisol());
+                        AttributeModifier modifier = attribute.getModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                        float damage = CortisolSwordItem.getDamageForCortisol(cortisol.getCortisol());
 
-                    if (modifier == null || modifier.getAmount() != damage) {
-                        attribute.removeModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
-                        attribute.addTransientModifier(new AttributeModifier(
-                                CortisolSwordItem.ATTACK_DAMAGE_UUID,
-                                "Cortisol damage",
-                                damage,
-                                AttributeModifier.Operation.ADDITION
-                        ));
+                        if (modifier == null || modifier.getAmount() != damage) {
+                            attribute.removeModifier(CortisolSwordItem.ATTACK_DAMAGE_UUID);
+                            attribute.addTransientModifier(new AttributeModifier(
+                                    CortisolSwordItem.ATTACK_DAMAGE_UUID,
+                                    "Cortisol damage",
+                                    damage,
+                                    AttributeModifier.Operation.ADDITION
+                            ));
+                        }
                     }
                 }
 
                 //random blinking
-                if (currentCortisol<BLINKING_TREASHOLD&&player.getRandom().nextFloat()<0.005f){
+                if (currentCortisol<BLINKING_TREASHOLD&&player.getRandom().nextFloat()<0.001f){
 
                     EyesHudOverlay.blink();
                 }
@@ -358,18 +368,14 @@ public class ModEvents {
                 });
             }
         }
-        if (event.getEntity() instanceof ServerPlayer player) {
+    }
+    @SubscribeEvent
+    public static void onPlayerDeath(LivingDeathEvent event){
+        if (event.getEntity() instanceof ServerPlayer player && event.getSource().is(ModDamageTypes.CORTISOL)){
+            player.level().explode(player,player.getX(),player.getY(),player.getZ(),CORTISOL_EXPLOSION_RADIUS,Level.ExplosionInteraction.TNT);
 
-            player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-
-                if (cortisol.getCortisol() == 0) {
-
-                    cortisol.setCortisol(BASE_CORTISOL);
-                }
-            });
         }
     }
-
 
     private static final String INTRO_TAG = "intro_played";
     // Start intro cutscene only if it is the first time the player logs in this world

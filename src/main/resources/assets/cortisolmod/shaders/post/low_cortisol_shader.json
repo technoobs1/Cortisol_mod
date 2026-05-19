@@ -2,13 +2,13 @@
   "targets": ["swap"],
   "passes": [
     {
-      "name": "cortisolmod:cortisol_blur",
+      "name": "cortisolmod:low_cortisol_shader",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
         {
-        "name": "RADIUS",
-          "values":[0.3]
+          "name": "Intensity",
+          "values":[1.0]
         }
       ]
     },
