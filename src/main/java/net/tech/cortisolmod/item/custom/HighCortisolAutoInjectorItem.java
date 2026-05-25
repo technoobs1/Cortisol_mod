@@ -43,7 +43,7 @@ public class HighCortisolAutoInjectorItem extends Item {
         if (!level.isClientSide && entity instanceof Player player) {
 
             player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-                cortisol.subCortisol(this.cortisol_amount,player);
+                cortisol.addCortisol(this.cortisol_amount,player);
 
                 ModMessages.sendToAllPlayers(
                         new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())

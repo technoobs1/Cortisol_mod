@@ -17,6 +17,7 @@ import net.tech.cortisolmod.item.ModCreativeModTabs;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.particle.ModParticles;
+import net.tech.cortisolmod.worldgen.biome.ModTerraBlender;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -38,12 +39,14 @@ public class CortisolMod
         ModBlocks.register(modEventBus);
         ModCreativeModTabs.register(modEventBus);
         ModEffects.register(modEventBus);
+        ModTerraBlender.registerBiomes();
 
         ModParticles.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
