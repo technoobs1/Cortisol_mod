@@ -15,8 +15,11 @@ import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.tech.cortisolmod.item.ModItems;
+import net.tech.cortisolmod.networking.ModMessages;
+import net.tech.cortisolmod.networking.packet.CortisolMobSyncS2CPacket;
 import net.tech.cortisolmod.particle.ModParticles;
 import net.tech.cortisolmod.util.AdvancementHelper;
+import net.tech.cortisolmod.util.ModEntityData;
 import net.tech.cortisolmod.worldgen.biome.ModBiomes;
 
 import java.util.Random;
@@ -95,7 +98,8 @@ public class CortisolMobEvents {
         mob.setCustomNameVisible(true);
         // Uncomment to set a custom name to the mob ("Cortisol [mobname]" in red)
         // mob.setCustomName(net.minecraft.network.chat.Component.literal("§cCortisol " + mob.getName().getString()));
-    }
+
+        mob.getEntityData().set(ModEntityData.CORTISOL_MOB, true);    }
 
     // Made special drop for cortisol mob
     @SubscribeEvent
@@ -120,7 +124,12 @@ public class CortisolMobEvents {
     }
 
 
-
+    @SubscribeEvent
+    public static void onLivingSpawn(net.minecraftforge.event.entity.living.sp event) {
+        if (event.getEntity() instanceof Mob mob) {
+            mob.getEntityData().set(ModEntityData.CORTISOL_MOB, false);
+        }
+    }
 
 
 

@@ -1,6 +1,10 @@
 package net.tech.cortisolmod;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -13,6 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.tech.cortisolmod.block.ModBlocks;
 import net.tech.cortisolmod.effect.ModEffects;
+import net.tech.cortisolmod.event.ClientEventRender;
 import net.tech.cortisolmod.item.ModCreativeModTabs;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.networking.ModMessages;
@@ -31,6 +36,7 @@ public class CortisolMod
 
     public CortisolMod()
     {
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 
@@ -47,6 +53,8 @@ public class CortisolMod
 
         MinecraftForge.EVENT_BUS.register(this);
 
+
+        modEventBus.addListener(ClientEventRender::addRenderLayers);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

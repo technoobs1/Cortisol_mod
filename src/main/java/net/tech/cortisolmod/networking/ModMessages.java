@@ -7,6 +7,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.tech.cortisolmod.CortisolMod;
+import net.tech.cortisolmod.networking.packet.CortisolMobSyncS2CPacket;
 import net.tech.cortisolmod.networking.packet.CortisolSyncS2CPacket;
 import net.tech.cortisolmod.networking.packet.ExampleC2SPacket;
 import net.tech.cortisolmod.networking.packet.StartIntroCinematicS2CPacket;
@@ -41,6 +42,11 @@ public class ModMessages {
                 .decoder(StartIntroCinematicS2CPacket::new)
                 .encoder(StartIntroCinematicS2CPacket::toBytes)
                 .consumerMainThread(StartIntroCinematicS2CPacket::handle)
+                .add();
+        net.messageBuilder(CortisolMobSyncS2CPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(CortisolMobSyncS2CPacket::new)
+                .encoder(CortisolMobSyncS2CPacket::toBytes)
+                .consumerMainThread(CortisolMobSyncS2CPacket::handle)
                 .add();
     }
 

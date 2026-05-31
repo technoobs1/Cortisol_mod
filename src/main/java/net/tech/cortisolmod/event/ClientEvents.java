@@ -6,9 +6,13 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -16,8 +20,10 @@ import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tech.cortisolmod.CortisolMod;
 import net.tech.cortisolmod.client.ClientCortisolData;
+import net.tech.cortisolmod.client.CortisolTintLayer;
 import net.tech.cortisolmod.client.cinematic.BlinkCinematic;
 import net.tech.cortisolmod.cortisol.PlayerCortisol;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
@@ -132,6 +138,7 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void shaderUpdate(net.minecraftforge.event.TickEvent.RenderTickEvent event){
+
             Minecraft mc = Minecraft.getInstance();
             PostChain chain = mc.gameRenderer.currentEffect();
 
@@ -167,32 +174,8 @@ public class ClientEvents {
 
 
 
-        @SubscribeEvent
-        public static void onRenderLiving(RenderLivingEvent.Post<Mob, EntityModel<Mob>> event) {
-
-            LivingEntity entity = event.getEntity();
-
-            if (!entity.getPersistentData().getBoolean("cortisol_mob")) {
-                return;
-            }
-
-            PoseStack poseStack = event.getPoseStack();
-            MultiBufferSource buffer = event.getMultiBufferSource();
-
-            EntityModel<Mob> model = event.getRenderer().getModel();
-
-            var vertexConsumer = buffer.getBuffer(
-                    RenderType.entityTranslucent(RED_TEXTURE)
-            );
-
-            model.renderToBuffer(
-                    poseStack,
-                    vertexConsumer,
-                    event.getPackedLight(),
-                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
-                    1f, 0f, 0f, 0.4f
-            );
-        }
     }
+
+
 }
 
