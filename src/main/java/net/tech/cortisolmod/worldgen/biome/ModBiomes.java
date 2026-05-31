@@ -22,9 +22,6 @@ public class ModBiomes {
                     Registries.BIOME,
                     new ResourceLocation(CortisolMod.MOD_ID, "cortisol_biome"));
 
-    public static void bootstrap(BootstapContext<Biome> context){
-        context.register(CORTISOL_BIOME, cortisolBiome(context));
-    }
 
     public static void globalOverworldGeneration(BiomeGenerationSettings.Builder builder) {
         BiomeDefaultFeatures.addDefaultCarversAndLakes(builder);
@@ -77,4 +74,7 @@ public class ModBiomes {
                 .build();
     }
 
+    public static void boostrap(BootstapContext<Biome> context) {
+        context.register(CORTISOL_BIOME, cortisolBiome(context));
+    }
 }

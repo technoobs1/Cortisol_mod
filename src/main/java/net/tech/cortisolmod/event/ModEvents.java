@@ -104,6 +104,7 @@ public class ModEvents {
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event){
         if (event.isWasDeath()){
+            event.getOriginal().reviveCaps();
 
             event.getOriginal().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(oldStore -> {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(newStore -> {
@@ -365,15 +366,19 @@ public class ModEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerJoinWorld(EntityJoinLevelEvent event){
-        if (!event.getLevel().isClientSide()) {
-            if (event.getEntity() instanceof ServerPlayer player) {
-                player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
-                    ModMessages.sendToAllPlayers(
-                            new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
-                    );
-                });
-            }
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+
+            player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
+
+                ModMessages.sendToPlayer(
+                        new CortisolSyncS2CPacket(
+                                player.getId(),
+                                cortisol.getCortisol()
+                        ),
+                        player
+                );
+            });
         }
     }
     @SubscribeEvent

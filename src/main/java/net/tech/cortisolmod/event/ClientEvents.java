@@ -1,9 +1,14 @@
 package net.tech.cortisolmod.event;
 
 import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
@@ -29,6 +34,11 @@ public class ClientEvents {
 
     @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class cameraEffects {
+
+        private static final ResourceLocation RED_TEXTURE =
+                new ResourceLocation(CortisolMod.MOD_ID,
+                        "textures/misc/red_overlay.png");
+
         private static final int BREATHING_START_CORTISOL = 90;
         private static final float BASE_BREATHING_SPEED = 1.5f;
         private static final float MAX_BREATHING_SPEED = 3.5f;
@@ -153,6 +163,35 @@ public class ClientEvents {
                     intensity.set(max(1-ClientCortisolData.getPlayerCortisol()/30,0f));
                 }
             }
+        }
+
+
+
+        @SubscribeEvent
+        public static void onRenderLiving(RenderLivingEvent.Post<Mob, EntityModel<Mob>> event) {
+
+            LivingEntity entity = event.getEntity();
+
+            if (!entity.getPersistentData().getBoolean("cortisol_mob")) {
+                return;
+            }
+
+            PoseStack poseStack = event.getPoseStack();
+            MultiBufferSource buffer = event.getMultiBufferSource();
+
+            EntityModel<Mob> model = event.getRenderer().getModel();
+
+            var vertexConsumer = buffer.getBuffer(
+                    RenderType.entityTranslucent(RED_TEXTURE)
+            );
+
+            model.renderToBuffer(
+                    poseStack,
+                    vertexConsumer,
+                    event.getPackedLight(),
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
+                    1f, 0f, 0f, 0.4f
+            );
         }
     }
 }
