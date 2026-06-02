@@ -1,5 +1,6 @@
 package net.tech.cortisolmod.item.custom;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.networking.packet.CortisolSyncS2CPacket;
+import net.tech.cortisolmod.util.AdvancementHelper;
 
 public class HighCortisolAutoInjectorItem extends Item {
 
@@ -32,6 +34,8 @@ public class HighCortisolAutoInjectorItem extends Item {
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide && entity instanceof Player player) {
+
+            AdvancementHelper.grant((ServerPlayer) player, "cortisolmod:cortisol/i_love_drugs");
 
             player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                 cortisol.addCortisol(this.cortisol_amount);
