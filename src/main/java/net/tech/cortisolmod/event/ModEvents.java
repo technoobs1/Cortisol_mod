@@ -214,7 +214,7 @@ public class ModEvents {
                     cortisol.subCortisol(FISHING_CORTISOL,player);
 
                 }
-                if(player.getInventory().contains(new ItemStack(ModItems.CORTILIUM_INGOT.get())) ){
+                if(player.getInventory().contains(new ItemStack(ModItems.CORTILIUM_INGOT.get()))||player.getInventory().contains(new ItemStack(ModItems.REFINED_CORTILIUM.get()))  ){
                     cortisol.addCortisol(CORTISOL_INGOT_INCREASE_AMOUNT,player);
                 }
 
@@ -383,6 +383,8 @@ public class ModEvents {
             });
         }
     }
+
+
     @SubscribeEvent
     public static void onPlayerDeath(LivingDeathEvent event){
         if (event.getEntity() instanceof ServerPlayer player && event.getSource().is(ModDamageTypes.CORTISOL)){

@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cortilium": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "cortisolmod:cortilium"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "cortisolmod:low_cortisol_injector"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_cortilium",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "cortisolmod:low_cortisol_injector"
+    ]
+  },
+  "sends_telemetry_event": false
+}

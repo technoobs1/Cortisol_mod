@@ -2,6 +2,7 @@ package net.tech.cortisolmod.datagen;
 
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -47,7 +48,38 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .define('I', ModItems.CORTILIUM_INGOT.get())
                 .unlockedBy(getHasName(ModItems.CORTILIUM_INGOT.get()),has(ModItems.CORTILIUM_INGOT.get()))
                 .save(pWriter);
-        }
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.LOW_CORTISOL_INJECTOR.get())
+            .pattern("GLG")
+            .pattern("GCG")
+            .pattern(" I ")
+            .define('G', Items.GLASS)
+            .define('C', ModItems.CORTILIUM.get())
+            .define('I', Items.IRON_INGOT)
+            .define('L', Ingredient.of(ItemTags.LEAVES))
+            .unlockedBy(getHasName(ModItems.CORTILIUM.get()),has(ModItems.CORTILIUM.get()))
+            .save(pWriter);
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.HIGH_CORTISOL_INJECTOR.get())
+                .pattern("GBG")
+                .pattern("GCG")
+                .pattern(" I ")
+                .define('G', Items.GLASS)
+                .define('C', ModItems.CORTILIUM.get())
+                .define('I', Items.IRON_INGOT)
+                .define('B', Items.BOOK)
+                .unlockedBy(getHasName(ModItems.CORTILIUM.get()),has(ModItems.CORTILIUM.get()))
+                .save(pWriter);
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.CORTISOL_STABILIZER_SERINGE.get())
+                .pattern("GCG")
+                .pattern("GCG")
+                .pattern(" I ")
+                .define('G', Items.GLASS)
+                .define('C', ModItems.CORTILIUM_INGOT.get())
+                .define('I', Items.IRON_INGOT)
+
+                .unlockedBy(getHasName(ModItems.CORTILIUM.get()),has(ModItems.CORTILIUM.get()))
+                .save(pWriter);
+
+}
 
 
 
