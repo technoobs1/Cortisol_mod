@@ -42,7 +42,8 @@ public class CortisolMobEvents {
     private static final float HEALTH_MODIFIER = 2f;
 
     // 1% chance (it's actually a lot, no ???)
-    private static final double CHANCE = 0.01;
+    //private static final double CHANCE = 0.01;
+    private static final double CHANCE = 0.5;
 
 
     @SubscribeEvent

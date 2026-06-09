@@ -192,15 +192,23 @@ public class ModEvents {
                     ));
                 }
 
-                // Grant the 100 cortisol advancement
-                if (currentCortisol >= 100) {
-                    AdvancementHelper.grant(player, "cortisolmod:max_cortisol");
+                // Grant the çà cortisol advancement
+                if (currentCortisol >= 90) {
+                    AdvancementHelper.grant(player, "cortisolmod:cortisol/hey_whats_that");
+                }
+                // Grant the 0 cortisol advancement
+                if (currentCortisol <= 0) {
+                    AdvancementHelper.grant(player, "cortisolmod:cortisol/i_feel_good");
                 }
 
-                //damage
+                // Damage
                 if (currentCortisol >= DAMAGE_START_CORTISOL) {
                     if (player.tickCount % DAMAGE_TICK_INTERVAL == 0) {
                         player.hurt(ModDamageTypes.cortisolDamage((ServerLevel) level), DAMAGE_PER_TICK);
+
+                        if (player.getHealth() <= 4) {
+                            AdvancementHelper.grant(player, "cortisolmod:cortisol/im_kind_of_stressed");
+                        }
                     }
                 }
 
@@ -324,16 +332,15 @@ public class ModEvents {
                             new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
                     );
                 }
-
-
-
             });
         }
-        if (event.getSource().getEntity() instanceof ServerPlayer player && event.getEntity() instanceof Monster) {
-
-
+        if (event.getSource().getEntity() instanceof ServerPlayer player && event.getEntity() instanceof Monster monster) {
             if (event.getAmount() > 0) {
-
+                // Grant the advancement if its a cortisol mob
+                // Check the tag
+                if (monster.getPersistentData().getBoolean("cortisol_mob")) {
+                    AdvancementHelper.grant(player, "cortisolmod:cortisol/attack_cortisol_mob");
+                }
                 player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() < PlayerCortisol.REAL_MAX_CORTISOL) {
                         int currentTick = player.tickCount;
@@ -389,7 +396,22 @@ public class ModEvents {
     public static void onPlayerDeath(LivingDeathEvent event){
         if (event.getEntity() instanceof ServerPlayer player && event.getSource().is(ModDamageTypes.CORTISOL)){
             player.level().explode(player,player.getX(),player.getY(),player.getZ(),CORTISOL_EXPLOSION_RADIUS,Level.ExplosionInteraction.TNT);
+            AdvancementHelper.increment(player, "cortisolmod:cortisol/kaboom");
+        }
+        if (event.getSource().getEntity() instanceof ServerPlayer player && event.getEntity() instanceof Monster monster) {
+            // Grant possible advancements if its a cortisol mob
+            // Check the tag
+            if (monster.getPersistentData().getBoolean("cortisol_mob")) {
+                AdvancementHelper.increment(player, "cortisolmod:cortisol/now_im_relaxed");
 
+                ItemStack weapon = player.getMainHandItem();
+                player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
+                    float currentCortisol = cortisol.getCortisol();
+                    if (weapon.is(ModItems.CORTISOL_SWORD.get()) && currentCortisol >= 100){
+                        AdvancementHelper.grant(player, "cortisolmod:cortisol/kind_of_easy");
+                    }
+                });
+            }
         }
     }
 

@@ -28,4 +28,21 @@ public class AdvancementHelper {
             player.getAdvancements().award(advancement, criterion);
         }
     }
+
+    public static void increment(ServerPlayer player, String advancementId) {
+        if (player == null || player.server == null) return;
+        ResourceLocation id = ResourceLocation.tryParse(advancementId);
+        if (id == null) return;
+
+        Advancement advancement = player.server.getAdvancements().getAdvancement(id);
+        if (advancement == null) return;
+
+        AdvancementProgress progress =player.getAdvancements().getOrStartProgress(advancement);
+        if (progress.isDone()) return;
+
+        for (String criterion : progress.getRemainingCriteria()) {
+            player.getAdvancements().award(advancement, criterion);
+            break; // Only one criterion, it's an incrementation, not a grant of the achievement
+        }
+    }
 }
