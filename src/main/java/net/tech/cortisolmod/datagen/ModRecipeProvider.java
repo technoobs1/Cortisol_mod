@@ -55,7 +55,7 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
             .define('G', Items.GLASS)
             .define('C', ModItems.CORTILIUM.get())
             .define('I', Items.IRON_INGOT)
-            .define('L', Ingredient.of(ItemTags.LEAVES))
+            .define('L', Items.GRASS)
             .unlockedBy(getHasName(ModItems.CORTILIUM.get()),has(ModItems.CORTILIUM.get()))
             .save(pWriter);
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.HIGH_CORTISOL_INJECTOR.get())
