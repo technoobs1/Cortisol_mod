@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "cortisolmod:cortilium_ingot"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "GCG",
+    "GCG",
+    " I "
+  ],
+  "result": {
+    "item": "cortisolmod:cortisol_stabilizer_seringe"
+  },
+  "show_notification": true
+}

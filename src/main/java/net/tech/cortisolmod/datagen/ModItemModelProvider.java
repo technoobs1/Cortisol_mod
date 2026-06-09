@@ -8,6 +8,7 @@ import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.RegistryObject;
 import net.tech.cortisolmod.CortisolMod;
+import net.tech.cortisolmod.item.ModItems;
 
 public class ModItemModelProvider extends ItemModelProvider {
     public ModItemModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
@@ -16,6 +17,8 @@ public class ModItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
+        simpleItem(ModItems.CORTILIUM);
+        simpleItem(ModItems.CORTILIUM_INGOT);
 
     }
     private ItemModelBuilder simpleItem(RegistryObject<Item> item){

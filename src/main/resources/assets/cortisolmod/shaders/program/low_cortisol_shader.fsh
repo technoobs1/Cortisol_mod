@@ -11,11 +11,10 @@ void main()
 {
     vec4 color = texture(DiffuseSampler, texCoord);
 
-    vec3 tint =vec3(1.16, 1.11, 0.82);
+    vec3 tint =vec3(1.22, 1.15, 0.82);
 
-    color.rgb = mix(color.rgb, color.rgb * tint, Intensity);
-    float contrast = 1.07;
-    color.rgb= (color.rgb - 0.5) * 1.07 + 0.5;
+    color.rgb = mix(color.rgb, (color.rgb * tint- 0.5) * 1.1 + 0.5, Intensity);
+
 
     fragColor = vec4(color.rgb,1.);
 

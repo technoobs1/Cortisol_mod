@@ -150,7 +150,7 @@ public class CortisolCommands {
                     : ctx.getSource().getPlayerOrException();
 
             player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(c -> {
-                c.addCortisol(value);
+                c.addCortisol(value,player);
 
                 ModMessages.sendToAllPlayers(
                         new CortisolSyncS2CPacket(player.getId(), c.getCortisol())

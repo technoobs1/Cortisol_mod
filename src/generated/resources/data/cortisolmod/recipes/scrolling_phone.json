@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "item": "cortisolmod:cortilium"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "III",
+    "ICI",
+    "IRI"
+  ],
+  "result": {
+    "item": "cortisolmod:scrolling_phone"
+  },
+  "show_notification": true
+}

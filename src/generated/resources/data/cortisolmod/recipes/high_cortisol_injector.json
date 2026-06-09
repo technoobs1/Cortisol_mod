@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "C": {
+      "item": "cortisolmod:cortilium"
+    },
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "pattern": [
+    "GBG",
+    "GCG",
+    " I "
+  ],
+  "result": {
+    "item": "cortisolmod:high_cortisol_injector"
+  },
+  "show_notification": true
+}

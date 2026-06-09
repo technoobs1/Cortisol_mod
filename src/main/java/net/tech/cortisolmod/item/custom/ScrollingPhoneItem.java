@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
+import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.networking.packet.CortisolSyncS2CPacket;
 
@@ -78,7 +79,7 @@ public class ScrollingPhoneItem extends Item {
 
                 pPlayer.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                     if (cortisol.getCortisol() > 0) {
-                        cortisol.subCortisol(CORTISOL_SUB_PHONE);
+                        cortisol.subCortisol(CORTISOL_SUB_PHONE,pPlayer);
                         ModMessages.sendToAllPlayers(
                                 new CortisolSyncS2CPacket(pPlayer.getId(), cortisol.getCortisol())
                         );
@@ -90,7 +91,7 @@ public class ScrollingPhoneItem extends Item {
 
     @Override
     public boolean isValidRepairItem(ItemStack pStack, ItemStack pRepairCandidate) {
-               return pRepairCandidate.is(Items.DIAMOND) || super.isValidRepairItem(pStack, pRepairCandidate);
+               return pRepairCandidate.is(ModItems.CORTILIUM.get()) || super.isValidRepairItem(pStack, pRepairCandidate);
     }
     @Override
     public void inventoryTick(ItemStack pStack, Level pLevel, Entity pEntity, int pSlotId, boolean pIsSelected) {

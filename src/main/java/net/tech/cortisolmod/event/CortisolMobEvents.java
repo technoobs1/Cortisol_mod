@@ -1,12 +1,6 @@
 package net.tech.cortisolmod.event;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.client.model.ZombieModel;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -14,18 +8,18 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.tech.cortisolmod.item.ModItems;
+import net.tech.cortisolmod.networking.ModMessages;
+import net.tech.cortisolmod.networking.packet.CortisolMobSyncS2CPacket;
 import net.tech.cortisolmod.particle.ModParticles;
 import net.tech.cortisolmod.util.AdvancementHelper;
+import net.tech.cortisolmod.worldgen.biome.ModBiomes;
 
 import java.util.Random;
 import java.util.Objects;
@@ -51,6 +45,7 @@ public class CortisolMobEvents {
     //private static final double CHANCE = 0.01;
     private static final double CHANCE = 0.5;
 
+
     @SubscribeEvent
     public static void onFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
         Mob mob = event.getEntity();
@@ -62,6 +57,12 @@ public class CortisolMobEvents {
         // Check if cortisol tag already exist
         CompoundTag tag = mob.getPersistentData();
         if (tag.getBoolean(TAG_CORTISOL)) return;
+        //span in cortisol biome
+
+        if (event.getLevel().getBiome(mob.blockPosition()).is(ModBiomes.CORTISOL_BIOME)){
+            applyCortisol(mob);
+            return;
+        }
 
         // RNG
         if (mob.getRandom().nextDouble() > CHANCE) {
@@ -95,10 +96,19 @@ public class CortisolMobEvents {
         mob.setHealth(mob.getMaxHealth());
 
         // Simple visuals
-        mob.setCustomNameVisible(true);
+        //mob.setCustomNameVisible(true);
         // Uncomment to set a custom name to the mob ("Cortisol [mobname]" in red)
         // mob.setCustomName(net.minecraft.network.chat.Component.literal("§cCortisol " + mob.getName().getString()));
-    }
+
+
+        mob.getPersistentData().putBoolean("cortisol_mob", true);
+        ModMessages.sendToAllPlayers(
+                new CortisolMobSyncS2CPacket(
+                        mob.getId(),
+                        true
+                )
+        );
+        }
 
     // Made special drop for cortisol mob
     @SubscribeEvent
@@ -110,10 +120,12 @@ public class CortisolMobEvents {
         if (!entity.getPersistentData().getBoolean(TAG_CORTISOL)) return;
 
         Level level = entity.level();
-        // Drop cortilium (random between 1 and 2)
-        ItemStack diamonds = new ItemStack(ModItems.CORTILIUM.get(), random.nextInt(2)+1);
 
-        ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), diamonds);
+        // Drop cortilium (random between 1 and 2)
+
+        ItemStack cortilium = new ItemStack(ModItems.CORTILIUM.get(), random.nextInt(2)+1);
+
+        ItemEntity drop = new ItemEntity(level, entity.getX(), entity.getY(), entity.getZ(), cortilium);
         event.getDrops().add(drop);
 
         // Advancement
@@ -121,8 +133,6 @@ public class CortisolMobEvents {
             AdvancementHelper.grant(player, "cortisolmod:kill_cortisol_mob");
         }
     }
-
-
 
 
 

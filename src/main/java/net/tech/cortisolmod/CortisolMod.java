@@ -1,6 +1,10 @@
 package net.tech.cortisolmod;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.Mob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,10 +16,13 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.tech.cortisolmod.block.ModBlocks;
+import net.tech.cortisolmod.effect.ModEffects;
+import net.tech.cortisolmod.event.ClientEventRender;
 import net.tech.cortisolmod.item.ModCreativeModTabs;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.particle.ModParticles;
+import net.tech.cortisolmod.worldgen.biome.ModTerraBlender;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -29,6 +36,7 @@ public class CortisolMod
 
     public CortisolMod()
     {
+
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
 
@@ -36,12 +44,17 @@ public class CortisolMod
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
         ModCreativeModTabs.register(modEventBus);
+        ModEffects.register(modEventBus);
+        ModTerraBlender.registerBiomes();
 
         ModParticles.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
+
+
+        modEventBus.addListener(ClientEventRender::addRenderLayers);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

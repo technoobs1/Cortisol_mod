@@ -17,12 +17,16 @@ public class CortisolHudOverlay {
     private static final ResourceLocation CORTISOL_BAR = new ResourceLocation(CortisolMod.MOD_ID, "/textures/cortisol/cortisol_meter.png");
     private static final ResourceLocation CORTISOL_ARROW = new ResourceLocation(CortisolMod.MOD_ID, "/textures/cortisol/cortisol_arrow.png");
 
-    public static final int HUD_BAR_WIDTH = 110;
-    public static final int HUD_BAR_HEIGHT = 65;
-    public static final int HUD_ARROW_WIDTH = 30;
-    public static final int HUD_ARROW_HEIGHT = 90;
-    public static final int HUD_ARROW_X = 40;
-    public static final int HUD_ARROW_Y_OFFSET = 37;
+    public static final int HUD_BAR_WIDTH = 100;
+    public static final int HUD_BAR_HEIGHT = 100;
+    public static final int HUD_BAR_X_OFFSET = 40;
+    public static final int HUD_BAR_Y_OFFSET = 37;
+    public static final int HUD_ARROW_WIDTH = 100;
+    public static final int HUD_ARROW_HEIGHT = 100;
+    public static final int HUD_ARROW_X_OFFSET = 0;
+    public static final int HUD_ARROW_Y_OFFSET = 0;
+    public static final float bar_screen_percentage = 0.25f;
+
 
     public static final float ANGLE_DEGREES_PER_CORTISOL = 1.8f;
     public static final float ANGLE_OFFSET_DEGREES = -90f;
@@ -37,8 +41,7 @@ public class CortisolHudOverlay {
     public static IGuiOverlay HUD_CORTISOL = (CortisolHudOverlay::render);
 
     private static void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
-        int x_bar = 0;
-        int y_bar = screenHeight - HUD_BAR_HEIGHT;
+
 
         float currentCortisol = ClientCortisolData.getPlayerCortisol();
         float displayCortisol = Math.min(currentCortisol, PlayerCortisol.VISIBLE_MAX_CORTISOL);
@@ -56,22 +59,36 @@ public class CortisolHudOverlay {
 
         angle += (targetAngle - angle) * ANGLE_SMOOTHING;
 
+
+
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, CORTISOL_BAR);
 
-        guiGraphics.blit(CORTISOL_BAR, x_bar, y_bar, 0, 0, HUD_BAR_WIDTH, HUD_BAR_HEIGHT, HUD_BAR_WIDTH, HUD_BAR_HEIGHT);
 
-        int x_arrow = HUD_ARROW_X;
-        int y_arrow = screenHeight - HUD_ARROW_HEIGHT + HUD_ARROW_Y_OFFSET;
+        int width_display_size_bar = (int) (screenWidth *bar_screen_percentage);
+        int height_display_size_bar = (int)(width_display_size_bar* (float)HUD_BAR_WIDTH/(float)HUD_BAR_HEIGHT);
+
+        int x_bar = 0;
+        int y_bar = (int)(screenHeight - height_display_size_bar+0.3*height_display_size_bar);
+
+        guiGraphics.blit(CORTISOL_BAR, x_bar, y_bar, 0, 0, width_display_size_bar, height_display_size_bar, width_display_size_bar, height_display_size_bar);
+
+
+        int width_display_size_arrow= (int) (screenWidth *bar_screen_percentage);
+        int height_display_size_arrow = (int)(width_display_size_bar* (float)HUD_ARROW_WIDTH/(float)HUD_ARROW_HEIGHT);
+
+        int x_arrow = 0;
+        int y_arrow = (int)(screenHeight - height_display_size_arrow + 0.44*height_display_size_arrow);
         PoseStack pose = guiGraphics.pose();
         pose.pushPose();
 
-        pose.translate(x_arrow + HUD_ARROW_WIDTH / 2f, y_arrow + HUD_ARROW_HEIGHT / 2f, 0);
-        pose.mulPose(Axis.ZP.rotationDegrees(angle + shakeAngle));
-        pose.translate(-x_arrow - HUD_ARROW_WIDTH / 2f, -y_arrow - HUD_ARROW_HEIGHT / 2f, 0);
 
-        guiGraphics.blit(CORTISOL_ARROW, x_arrow, y_arrow, 0, 0, HUD_ARROW_WIDTH, HUD_ARROW_HEIGHT, HUD_ARROW_WIDTH, HUD_ARROW_HEIGHT);
+        pose.translate(x_arrow + width_display_size_arrow / 2f, y_arrow + height_display_size_arrow / 2f, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(angle + shakeAngle));
+        pose.translate(-x_arrow - width_display_size_arrow / 2f, -y_arrow - height_display_size_arrow / 2f, 0);
+
+        guiGraphics.blit(CORTISOL_ARROW, x_arrow, y_arrow, 0, 0, width_display_size_arrow, height_display_size_arrow, width_display_size_arrow, height_display_size_arrow);
         pose.popPose();
 
         if (!FMLEnvironment.production) {
