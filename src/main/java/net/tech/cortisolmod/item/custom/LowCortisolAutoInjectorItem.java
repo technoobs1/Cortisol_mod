@@ -1,10 +1,11 @@
 package net.tech.cortisolmod.item.custom;
 
-import net.minecraft.server.level.ServerPlayer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.HumanoidArm;
@@ -19,15 +20,17 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.tech.cortisolmod.cortisol.PlayerCortisolProvider;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.networking.packet.CortisolSyncS2CPacket;
-import net.tech.cortisolmod.util.AdvancementHelper;
+import net.tech.cortisolmod.util.ModSounds;
 
 import java.util.function.Consumer;
+
+import static net.minecraft.world.item.SpyglassItem.USE_DURATION;
 
 public class LowCortisolAutoInjectorItem extends Item {
 
     private final int cooldown;
     private final float cortisol_amount;
-    private final int useDuration= 15;
+    private static final int USE_DURATION= 15;
     public LowCortisolAutoInjectorItem(Properties pProperties, int cooldown, float cortisol_add) {
         super(pProperties);
         this.cooldown = cooldown;
@@ -46,8 +49,14 @@ public class LowCortisolAutoInjectorItem extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         if (!level.isClientSide && entity instanceof Player player) {
 
-            AdvancementHelper.grant((ServerPlayer) player, "cortisolmod:cortisol/i_love_drugs");
-
+            level.playSound(
+                    player,
+                    player.getX(), player.getY(), player.getZ(),
+                    ModSounds.SYRINGE_USE.get(),
+                    SoundSource.PLAYERS,
+                    1.0f,
+                    1.0f
+            );
             player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
                 cortisol.subCortisol(this.cortisol_amount,player);
 
@@ -65,78 +74,9 @@ public class LowCortisolAutoInjectorItem extends Item {
         return stack;
     }
     @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer)
-    {
-        consumer.accept(new IClientItemExtensions() {
+    public void initializeClient(Consumer<IClientItemExtensions> consumer){
 
-            private final HumanoidModel.ArmPose INJECT_POSE =
-                    HumanoidModel.ArmPose.create("INJECT", true,
-                            (model, entity, arm) -> {
-                                float x= (float)(entity.getUseItemRemainingTicks()-2) /useDuration;
-                                float progress =
-                                        1.0F - (x);
-
-                                float anim = Math.max((float)Math.sin(progress * Math.PI)*(float)Math.exp( 1- 2.8*x),0f);
-
-                                if (arm == HumanoidArm.RIGHT) {
-                                    model.rightArm.yRot = -0.5F;
-                                    model.rightArm.xRot = -anim * 2.0F;
-                                    model.rightArm.zRot = -0.7F;
-
-                                    model.leftArm.yRot = 0.7F;
-                                    model.leftArm.xRot = -0.3F;
-                                    model.leftArm.zRot = 0.3F;
-
-                                } else {
-
-                                    model.leftArm.yRot = -0.5F;
-                                    model.leftArm.xRot = -anim * 2.0F;
-                                    model.leftArm.zRot = -0.7F;
-
-                                    model.rightArm.yRot = 0.7F;
-                                    model.rightArm.xRot = -0.3F;
-                                    model.rightArm.zRot = 0.3F;
-                                }
-                            });
-
-            @Override
-            public HumanoidModel.ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack) {
-                if (!itemStack.isEmpty()) {
-                    if (entityLiving.getUsedItemHand() == hand && entityLiving.getUseItemRemainingTicks() > 0) {
-                        return INJECT_POSE;
-                    }
-                }
-                return HumanoidModel.ArmPose.EMPTY;
-            }
-
-            @Override
-            public boolean applyForgeHandTransform(PoseStack poseStack, LocalPlayer player, HumanoidArm arm, ItemStack itemInHand, float partialTick, float equipProcess, float swingProcess) {
-                if (player.isUsingItem()
-                        && ItemStack.isSameItemSameTags(player.getUseItem(), itemInHand)) {
-                    float x= (float)(player.getUseItemRemainingTicks()-2) /useDuration;
-
-                    float progress =
-                            1.0F - ((player.getUseItemRemainingTicks() - partialTick) / 15F);
-
-
-                    float anim = Math.max((float)Math.sin(progress * Math.PI)*(float)Math.exp( 1- 2.8*x),-0.5f);
-
-                    int dir = arm == HumanoidArm.RIGHT ? 1 : -1;
-
-                    // avant / arrière
-                    //poseStack.translate(0.0F, -curve * 0.10F, -curve * 0.35F);
-
-                   //haut/bas
-                    poseStack.translate(0.0F, anim*0.5f, 0.0F);
-
-                    // rotation
-                    //poseStack.mulPose(Axis.XP.rotationDegrees(-curve * 35f));
-                    }
-
-
-                return false;
-            }
-        });
+        ClientAutoInjector.register(consumer, USE_DURATION);
     }
 
     @Override
