@@ -378,16 +378,14 @@ public class ModEvents {
     @SubscribeEvent
     public static void onPlayerBreak(BlockEvent.BreakEvent event){
         Player player = event.getPlayer();
-        System.out.println(event.getPos().equals(player.blockPosition().below()));
-        System.out.println(player.blockPosition().below());
-        System.out.println(event.getPos());
+
 
         player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol -> {
 
 
             BlockPos playerPos = player.blockPosition();
 
-            System.out.println("playerPos.below()");
+
             BlockPos pos =event.getPos();
             LevelAccessor level =event.getLevel();
             if (pos.equals(playerPos.below())&& !(level.isEmptyBlock(pos.north()) ||
