@@ -22,6 +22,7 @@ import net.tech.cortisolmod.item.ModCreativeModTabs;
 import net.tech.cortisolmod.item.ModItems;
 import net.tech.cortisolmod.networking.ModMessages;
 import net.tech.cortisolmod.particle.ModParticles;
+import net.tech.cortisolmod.util.ModSounds;
 import net.tech.cortisolmod.worldgen.biome.ModTerraBlender;
 import org.slf4j.Logger;
 
@@ -48,6 +49,7 @@ public class CortisolMod
         ModTerraBlender.registerBiomes();
 
         ModParticles.register(modEventBus);
+        ModSounds.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
