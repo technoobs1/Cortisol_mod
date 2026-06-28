@@ -110,21 +110,17 @@ public class ClientEvents {
 
 
         @SubscribeEvent
-        public static void checkCameraPerson(TickEvent.ClientTickEvent event){
+        public static void checkCameraPerson(TickEvent.ClientTickEvent event) {
+            // Only process once per full tick (END phase ensures world/renderer states are ready)
+            if (event.phase != TickEvent.Phase.END) return;
+
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player==null)return;
-            CameraType current = mc.options.getCameraType();
+            if (mc.player == null || mc.gameRenderer == null) return;
 
-            if (lastCameraType!=current){
-
-                if (current.isFirstPerson()){
-                    ClientSetup.loadCortisolShader();
-
-                }
-
-                lastCameraType=current;
+            // Ensure we are in first person and that no shader chain is currently active
+            if (mc.options.getCameraType().isFirstPerson() && mc.gameRenderer.currentEffect() == null) {
+                ClientSetup.loadCortisolShader();
             }
-
         }
 
         @SubscribeEvent

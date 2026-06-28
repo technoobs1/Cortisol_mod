@@ -11,7 +11,7 @@ public class PlayerCortisol {
     private int lastHitTick = -1;
 
 
-    private float cortisol;
+    private float cortisol=30;
 
     public float getCortisol() {
         return cortisol;
@@ -23,6 +23,7 @@ public class PlayerCortisol {
 
     public void addCortisol(float add, Player player) {
         if (player.hasEffect(ModEffects.CORTISOL_STABILIZER_EFFECT.get())) {
+            setCortisol(cortisol + 0.2f*add);
             return;
         }
         setCortisol(cortisol + add);
@@ -30,6 +31,7 @@ public class PlayerCortisol {
 
     public void subCortisol(float sub, Player player) {
         if (player.hasEffect(ModEffects.CORTISOL_STABILIZER_EFFECT.get())) {
+            setCortisol(cortisol - 0.2f*sub);
             return;
         }
         setCortisol(cortisol - sub);

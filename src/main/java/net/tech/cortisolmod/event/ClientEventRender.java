@@ -24,7 +24,7 @@ public class ClientEventRender {
                 tryAddLayer(event, entityType);
             });
         }
-        @SuppressWarnings("unchecked")
+
         private static <T extends net.minecraft.world.entity.LivingEntity,
                 M extends net.minecraft.client.model.EntityModel<T>>
         void tryAddLayer(EntityRenderersEvent.AddLayers event, EntityType<?> type) {

@@ -17,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
@@ -29,6 +30,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
 import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
@@ -57,6 +59,8 @@ import net.tech.cortisolmod.util.ModDamageTypes;
 
 import java.util.List;
 
+import static java.lang.Math.min;
+
 @Mod.EventBusSubscriber(modid = CortisolMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEvents {
 
@@ -66,6 +70,10 @@ public class ModEvents {
     public static final int DAMAGE_INCREASE_AMOUNT = 1;
     public static final float BREAK_INCREASE_AMOUNT = 1f;
     public static final float CORTISOL_INGOT_INCREASE_AMOUNT = 0.05f;
+    public static final float CROP_DECREASE_AMOUNT = 0.5f;
+    public static final float PIG_RIDING_CORTISOL = 0.05f;
+    public static final float BRIDGE_OVER_VOID_CORTISOL = 1f;
+
 
     public static final float  CORTISOL_EXPLOSION_RADIUS=5;
 
@@ -115,7 +123,7 @@ public class ModEvents {
             event.getOriginal().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(oldStore -> {
                 event.getEntity().getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(newStore -> {
 
-                    newStore.setCortisol(BASE_CORTISOL);
+                    //newStore.setCortisol(BASE_CORTISOL);
 
                     if (event.getEntity() instanceof ServerPlayer serverPlayer) {
                         ModMessages.sendToAllPlayers(
@@ -201,7 +209,9 @@ public class ModEvents {
                     AdvancementHelper.grant(player, "cortisolmod:max_cortisol");
                 }
 
-
+                if (player.getVehicle() instanceof Pig){
+                    cortisol.subCortisol(PIG_RIDING_CORTISOL, player);
+                }
                 //damage
                 if (currentCortisol >= DAMAGE_START_CORTISOL) {
                     if (player.tickCount % DAMAGE_TICK_INTERVAL == 0) {
@@ -388,6 +398,13 @@ public class ModEvents {
 
             BlockPos pos =event.getPos();
             LevelAccessor level =event.getLevel();
+            if (level.getBlockState(pos).getBlock() instanceof CropBlock crop && crop.isMaxAge(event.getState())){
+                cortisol.subCortisol(CROP_DECREASE_AMOUNT, event.getPlayer());
+
+                ModMessages.sendToAllPlayers(
+                        new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                );
+            }
             if (pos.equals(playerPos.below())&& !(level.isEmptyBlock(pos.north()) ||
                     level.isEmptyBlock(pos.south()) ||
                     level.isEmptyBlock(pos.east()) ||
@@ -404,7 +421,27 @@ public class ModEvents {
         });
     }
 
+    @SubscribeEvent
+    public static void onPlayerPlace(BlockEvent.EntityPlaceEvent event){
+        LevelAccessor level = event.getLevel();
+        BlockPos block =event.getPos();
+        for (int y = block.getY()-1; y>=min(level.getMinBuildHeight(),block.getY()-70) ; y--){
+            if (!level.getBlockState(new BlockPos(block.getX(),y,block.getZ() )).isAir()){
+                return;
+            }
+        }
 
+        if (event.getEntity() instanceof Player player){
+            player.getCapability(PlayerCortisolProvider.PLAYER_CORTISOL).ifPresent(cortisol->{
+                cortisol.addCortisol(BRIDGE_OVER_VOID_CORTISOL,player);
+                ModMessages.sendToAllPlayers(
+                        new CortisolSyncS2CPacket(player.getId(), cortisol.getCortisol())
+                );
+            });
+        }
+
+
+    }
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {

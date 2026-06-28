@@ -43,7 +43,7 @@ public class CortisolMobEvents {
 
     // 1% chance (it's actually a lot, no ???)
     //private static final double CHANCE = 0.01;
-    private static final double CHANCE = 0.5;
+    private static final double CHANCE = 0.01;
 
 
     @SubscribeEvent
@@ -57,7 +57,7 @@ public class CortisolMobEvents {
         // Check if cortisol tag already exist
         CompoundTag tag = mob.getPersistentData();
         if (tag.getBoolean(TAG_CORTISOL)) return;
-        //span in cortisol biome
+        //spawn in cortisol biome
 
         if (event.getLevel().getBiome(mob.blockPosition()).is(ModBiomes.CORTISOL_BIOME)){
             applyCortisol(mob);
